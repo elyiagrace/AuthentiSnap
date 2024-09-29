@@ -1,8 +1,7 @@
 # welcome_screen.py
-from PyQt5.QtWidgets import QMainWindow, QPushButton, QLabel, QVBoxLayout, QWidget, QHBoxLayout, QGraphicsDropShadowEffect
-from PyQt5.QtGui import QFont, QColor, QFontDatabase, QBrush, QPixmap, QPalette
+from PyQt5.QtWidgets import QMainWindow, QPushButton, QLabel, QVBoxLayout, QWidget, QHBoxLayout, QSizePolicy
+from PyQt5.QtGui import QFont, QFontDatabase, QBrush, QPixmap, QPalette
 from PyQt5.QtCore import Qt
-from custom_title_bar import CustomTitleBar  # Import CustomTitleBar from custom_title_bar.py
 from snipping_tool import SnippingTool
 import os
 
@@ -25,56 +24,98 @@ class WelcomeScreen(QMainWindow):
 
         layout = QVBoxLayout()
 
-        self.custom_title_bar = CustomTitleBar(self)
-        layout.addWidget(self.custom_title_bar)
-
         self.apply_modern_font()
 
+        # Create a horizontal layout for minimize and exit buttons
+        top_button_layout = QHBoxLayout()
+        top_button_layout.setAlignment(Qt.AlignRight)  # Align buttons to the right
+
+        # Add minimize and exit buttons
+        minimize_button = QPushButton("-")
+        exit_button = QPushButton("x")
+        minimize_button.setFixedSize(40, 30)
+        exit_button.setFixedSize(40, 30)
+
+        minimize_button.setStyleSheet("background-color: rgba(30, 30, 30, 180); color: white; border: none;")
+        exit_button.setStyleSheet("background-color: rgba(30, 30, 30, 180); color: white; border: none;")
+
+        # Connect minimize and exit buttons
+        minimize_button.clicked.connect(self.minimize_window)
+        exit_button.clicked.connect(self.close)
+
+        # Add minimize and exit buttons to the top button layout
+        top_button_layout.addWidget(minimize_button)
+        top_button_layout.addWidget(exit_button)
+
+        layout.addLayout(top_button_layout)
+
         # Welcome message label
-        welcome_message = QLabel("Welcome to Authentihash!")
+        welcome_message = QLabel("AUTHENTISNAP")
         welcome_message.setAlignment(Qt.AlignCenter)
-        welcome_message.setStyleSheet("color: white;")
-        welcome_message.setFont(QFont("Montserrat", 18, QFont.Bold))
+        welcome_message.setStyleSheet("""
+            background-color: rgba(100, 100, 100, 120);  /* Charcoal gray */
+            color: white;  /* White text for visibility */
+            border-radius: 15px;  /* Rounded edges */
+            padding: 10px 15px;  /* More padding for improved appearance */
+            margin: 20px;  /* Add margin for spacing */
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);  /* Subtle shadow effect */
+        """)
+        welcome_message.setFont(QFont("Roboto", 22, QFont.Bold))
         welcome_message.setWordWrap(True)
 
-        shadow_effect = QGraphicsDropShadowEffect()
-        shadow_effect.setBlurRadius(10)
-        shadow_effect.setColor(QColor(0, 0, 0, 160))
-        shadow_effect.setOffset(4, 4)
-        welcome_message.setGraphicsEffect(shadow_effect)
+        # Set size policy to fixed to prevent expansion
+        welcome_message.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        welcome_message.adjustSize()
 
-        layout.addWidget(welcome_message)
+        # Add a spacer above the welcome message to move it down
+        layout.addSpacing(80)  # Adjust this value to move the message down as needed
+        layout.addWidget(welcome_message, alignment=Qt.AlignCenter)
 
-        # Add the buttons for About and Snip
+        # Create a horizontal layout for the buttons
+        button_layout = QHBoxLayout()
+        button_layout.setAlignment(Qt.AlignCenter)  # Center the buttons
+
+        # Add buttons for About and Snip
         about_button = QPushButton("About")
         snip_button = QPushButton("Snip")
 
-        # Style for buttons
+        # Style for buttons (lighter gold)
         button_style = """
             QPushButton {
-                background-color: gold;  # Gold background
-                color: black;  # Black text
-                border: 2px solid darkred;  # Dark red border
-                border-radius: 10px;  # Rounded corners
-                padding: 10px 20px;  # Padding for button
-                font-size: 16px;  # Font size
-                font-weight: bold;  # Bold font
+                background-color: #E3CBA0;  /* Softer shade of gold */
+                color: black;  /* Black text */
+                border: none;  /* No border */
+                border-radius: 15px;  /* More rounded corners */
+                padding: 12px 25px;  /* Increased padding */
+                font-size: 16px;  /* Font size */
+                font-weight: bold;  /* Bold font */
             }
             QPushButton:hover {
-                background-color: darkred;  # Dark red hover effect
-                color: white;  # Change text color on hover
+                background-color: #D1B38D;  /* Darker shade on hover */
+                color: white;  /* Change text color on hover */
             }
         """
+
         about_button.setStyleSheet(button_style)
         snip_button.setStyleSheet(button_style)
 
-        layout.addWidget(about_button, alignment=Qt.AlignCenter)
-        layout.addWidget(snip_button, alignment=Qt.AlignCenter)
+        # Add buttons to the horizontal layout
+        button_layout.addWidget(about_button)
+        button_layout.addSpacing(20) 
+        button_layout.addWidget(snip_button)
+
+        # Add the button layout to the main layout
+        layout.addLayout(button_layout)
+
+        # Add a spacer below the button layout to push the buttons upwards
+        layout.addSpacing(80)  # Adjust this value to move the buttons further up
 
         # Connect button signals
         about_button.clicked.connect(self.show_about)
         snip_button.clicked.connect(self.start_snipping)
 
+
+        # Add the main layout to the central widget
         container = QWidget()
         container.setLayout(layout)
         self.setCentralWidget(container)
@@ -90,6 +131,9 @@ class WelcomeScreen(QMainWindow):
         self.close()
         self.snipping_tool = SnippingTool()
         self.snipping_tool.show()
+
+    def minimize_window(self):
+        self.showMinimized()
 
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:

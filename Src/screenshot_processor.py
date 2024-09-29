@@ -6,6 +6,7 @@ import hashlib
 import os
 from datetime import datetime
 import json
+from browser_url import get_current_url
 
 # Pinata API credentials (replace with your own)
 PINATA_API_KEY = '606bf7408333ac6cbb86'
@@ -14,6 +15,7 @@ PINATA_SECRET_API_KEY = '7db80593754fe44568a684e2af1c4f23868132f3f78637e14d579b9
 class ScreenshotProcessor:
     def __init__(self, file_path="snip_screenshot.png"):
         self.file_path = file_path
+        self.current_url = get_current_url()
 
     def save_screenshot(self, bbox):
         """ Capture and save the screenshot within the selected bounding box. """
@@ -22,13 +24,30 @@ class ScreenshotProcessor:
         print(f"Screenshot saved to {self.file_path}")
         return self.file_path
 
+
     def hash_screenshot(self):
-        """ Generate a SHA-256 hash of the screenshot. """
-        with open(self.file_path, "rb") as f:
-            file_bytes = f.read()
-            file_hash = hashlib.sha256(file_bytes).hexdigest()
-        print(f"Screenshot Hash: {file_hash}")
-        return file_hash
+        """ Generate a SHA-256 hash of the screenshot including URL and date-time. """
+        try:
+            # Retrieve the current URL
+            if not self.current_url:
+                raise Exception("Failed to retrieve the current URL")
+
+            # Get the current date and time
+            current_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+            with open(self.file_path, "rb") as f:
+                file_bytes = f.read()
+
+            # Concatenate file bytes, URL, and date-time
+            combined_data = file_bytes + current_datetime.encode() + str(self.current_url).encode()
+
+            # Generate the SHA-256 hash
+            file_hash = hashlib.sha256(combined_data).hexdigest()
+            print(f"Screenshot Hash: {file_hash}")
+            return file_hash
+        except Exception as e:
+            print(f"An error occurred while hashing the screenshot: {e}")
+            return None
 
     def store_to_ipfs(self):
         """ Upload the screenshot to Pinata (IPFS) with date-time metadata. """
@@ -41,7 +60,8 @@ class ScreenshotProcessor:
         pinata_metadata = {
             "name": os.path.basename(self.file_path),  # File name as the metadata name
             "keyvalues": {
-                "date_time": current_datetime  # Custom metadata field for date and time
+                "date_time": current_datetime,  # Custom metadata field for date and time
+                "url": str(self.current_url)
             }
         }
 
