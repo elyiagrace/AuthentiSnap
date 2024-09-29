@@ -9,8 +9,8 @@ import json
 from browser_url import get_current_url
 
 # Pinata API credentials (replace with your own)
-PINATA_API_KEY = '606bf7408333ac6cbb86'
-PINATA_SECRET_API_KEY = '7db80593754fe44568a684e2af1c4f23868132f3f78637e14d579b9f2e451c1c'
+PINATA_API_KEY = 'YOUR PINATA KEY'
+PINATA_SECRET_API_KEY = 'YOUR PINATA SECRET API KEY'
 
 class ScreenshotProcessor:
     def __init__(self, file_path="snip_screenshot.png"):
